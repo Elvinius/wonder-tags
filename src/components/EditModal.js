@@ -8,11 +8,9 @@ const EditModal = ({ editTagsModal, toggleEditTagsModal, handleEditedValue, upda
       <ModalHeader toggle={toggleEditTagsModal}>Edit tags</ModalHeader>
       <ModalBody>
         <Form>
-          <div className="panel panel-default">
-            <FormErrors formErrors={formErrors} />
-          </div>
-          <div className="form-group">
-            <Label for="adc-tags">Tags</Label>
+          <div className="form-group"> 
+            <Label for="adc-tags"> Tags </Label>
+            {formErrors && <FormErrors formErrors={formErrors} /> }
             <Input id="adc-tags" type="textarea" name="adc-tags" value={editedTagsData.value} onChange={handleEditedValue} className={`form-control ${errorClass(formErrors.tag)}`} placeholder="Add the tags" onKeyPress={updateTags}   />
           </div>
         </Form>

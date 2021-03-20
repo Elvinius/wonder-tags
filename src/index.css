@@ -53,10 +53,12 @@ li:hover span{
   border-radius: 4px;
   background-color: #f8f8f8; 
   resize: none;
+  margin-top: 0.5em;
  }
 
 .container.tags-container {
 	margin: 3em auto;
+	padding-top: 1em;
 	border-radius: 1%;
 	box-shadow: 0 0 5px 5px rgba(255, 255, 255, 0.5);
 	height: 500px;
@@ -111,4 +113,8 @@ div.tags-box {
 
 hr.break {
 	border-top: 1px dashed black;
+}
+
+label {
+	font-size: 1.25em;
 }

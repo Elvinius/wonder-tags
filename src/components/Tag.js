@@ -5,7 +5,6 @@ import { Button, Label, Form, Input } from 'reactstrap';
 import FormErrors from './FormErrors';
 import { FadeTransform } from 'react-animation-components';
 
-
 class Tag extends Component {
     constructor(props) {
         super(props);
@@ -157,11 +156,9 @@ class Tag extends Component {
         return (
             <div className="container tags-container">
                 <Form onSubmit={this.handleSubmit}>
-                    <div className="panel panel-default">
-                        <FormErrors formErrors={this.state.formErrors} />
-                    </div>
                     <div className="form-group">
-                        <Label for="adc-tags">Tags</Label>
+                        <Label for="adc-tags"> Tags </Label>
+                        {this.state.formErrors && <FormErrors formErrors={this.state.formErrors} /> }
                         <Input id="adc-tags" type="textarea" className={`form-control ${this.errorClass(this.state.formErrors.tag)}`} name="adc-tags" value={this.state.inputValue} onChange={this.handleChange} placeholder="Add the tags" onKeyPress={this.addTags} />
                     </div>
                     <Button className="main-buttons" color="secondary" onClick={this.editTags.bind(this, [...this.state.tags])} type="submit">Edit</Button>
