@@ -4,7 +4,7 @@ const FormErrors = ({ formErrors }) =>
     {Object.keys(formErrors).map((fieldName, i) => {
       if (formErrors[fieldName].length > 0) {
         return (
-          <p key={i}>Error: {formErrors[fieldName]}</p>
+          <small key={i}>Error: {formErrors[fieldName]}</small>
         )
       } else {
         return '';
