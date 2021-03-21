@@ -14,6 +14,7 @@ import HeadingJumbotron from './HeadingJumbotron';
 import {
     FadeTransform
 } from 'react-animation-components';
+import {controlData, errorClass} from '../utils.js';
 
 class Tag extends Component {
     constructor(props) {
@@ -36,9 +37,7 @@ class Tag extends Component {
         this.editTagsToInput = this.editTagsToInput.bind(this);
         this.deleteTag = this.deleteTag.bind(this);
         this.toggleEditTagsModal = this.toggleEditTagsModal.bind(this);
-        this.handleEditedValue = this.handleEditedValue.bind(this);
         this.refreshTags = this.refreshTags.bind(this);
-        this.controlData = this.controlData.bind(this);
         this.togglePopover = this.togglePopover.bind(this);
     }
 
@@ -60,26 +59,12 @@ class Tag extends Component {
     editTagsToInput = (tags) => {
         return tags.join();
     }
-    //Similar to the handleChange and used for handling input value changes in the edit field
-    handleEditedValue = (e) => {
-        let {
-            editedTagsData
-        } = this.state;
-        editedTagsData.value = e.target.value;
-        this.setState({
-            editedTagsData: editedTagsData
-        },
-            () => {
-                this.validateField(e.target.value)
-            })
-    }
     //Function to validate the input values, takes single event target value and checks if it fits the requirements
     validateField(value) {
         let fieldValidationErrors = this.state.formErrors;
         fieldValidationErrors.tag = '';
         let tagValid = true;
         let allowedCharacters = /;|,|\n|[A-Za-z]|\d|\s|-/; //regex for allowed characters in the input field
-
         if (value.length === 0) {
             fieldValidationErrors.tag = 'The form can not be blank!';
             tagValid = false;
@@ -100,10 +85,7 @@ class Tag extends Component {
             formValid: this.state.tagValid
         });
     }
-    //Apply bootstrap classes depending on the existence of the errors
-    errorClass(error) {
-        return (error.length === 0 ? 'is-valid' : 'is-invalid');
-    }
+
     //Add the tags after adding tags and clicking or pressing the Enter key
     addTags = (e) => {
         if (e.type === "submit" || (e.which === 13 && !e.shiftKey)) {
@@ -111,23 +93,21 @@ class Tag extends Component {
                 tags
             } = this.state;
             if (this.state.inputValue.length !== 0) {
-                let newTags = this.controlData(this.state.inputValue);
+                let newTags = controlData(this.state.inputValue);
                 newTags.forEach(tag => tags.push(tag));
                 let uniqueTags = [...new Set(tags)]; //Use the spread operator and Set to create a unique array
                 this.setState({
                     tags: uniqueTags,
                     inputValue: "",
                     editTagsModal: false
-                    //Set the local storage before submitting the button
-                }, localStorage.setItem('myTags', JSON.stringify(uniqueTags)));
+                    
+                }, 
+                //Set the local storage before submitting the button
+                localStorage.setItem('myTags', JSON.stringify(uniqueTags)));
             }
         }
-        //e.preventDefault();
     }
-    //implement filtering to prevent the unexpected behaviour of the JS
-    filterValue = (value) => {
-        return isNaN(value) === false && value !== "" && value !== "Infinity";
-    }
+ 
 
     //Delete tags according to their key values. As the added numbers should all be unique keys are composed of those number values
     deleteTag = (key) => (e) => {
@@ -163,13 +143,6 @@ class Tag extends Component {
             })
     }
 
-    //this function will take the input value and will return the filtered and trimmed value array
-    controlData = (data) => {
-        let reg = /\s*(?:;|,|\n|$)\s*/;
-        let filteredTags = data.split(reg).filter(value => this.filterValue(value)).map(v => Number(v.trim()));
-        return filteredTags;
-    }
-
     // to toggle popover button
     togglePopover = () => {
         this.setState({
@@ -186,7 +159,7 @@ class Tag extends Component {
                         <div className="form-group">
                             <Label for="adc-tags"> Tags </Label>
                             {this.state.formErrors && <FormErrors formErrors={this.state.formErrors} />}
-                            <Input type="submit" id="adc-tags" type="textarea" className={`form-control ${this.errorClass(this.state.formErrors.tag)}`} name="adc-tags" value={this.state.inputValue} onChange={this.handleChange} onKeyPress = {this.addTags} placeholder="Add the tags"/>
+                            <Input type="submit" id="adc-tags" type="textarea" className={`form-control ${errorClass(this.state.formErrors.tag)}`} name="adc-tags" value={this.state.inputValue} onChange={this.handleChange} onKeyPress = {this.addTags} placeholder="Add the tags"/>
                         </div>
                         <Button className="main-buttons" color="secondary" type="button" onClick={this.toggleEditTagsModal}>Edit</Button>
                         <Button className="main-buttons add-button" color="primary" type="submit" disabled={!this.state.formValid}>Add</Button>

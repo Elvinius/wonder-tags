@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { Button, Form, Input, Modal, ModalBody, ModalHeader, ModalFooter, Label } from 'reactstrap';
 import FormErrors from './FormErrors';
+import {controlData, errorClass} from '../utils.js';
 
 class EditModal extends Component {
   constructor(props) {
@@ -15,7 +16,6 @@ class EditModal extends Component {
 
     }
     this.handleChange = this.handleChange.bind(this);
-    this.errorClass = this.errorClass.bind(this);
   }
 
   componentDidMount() {
@@ -37,23 +37,11 @@ class EditModal extends Component {
 updateTags = (e) => {
   if (e.type === "click" || e.key === "Enter") { 
       let { inputValue } = this.state;
-      let changedTags = this.controlData(inputValue);
+      let changedTags = controlData(inputValue);
       let uniqueTags = [...new Set(changedTags)]; //Use the spread operator and Set to create a unique array
       localStorage.setItem('myTags', JSON.stringify(uniqueTags));
       this.props.onSave();
   }
-}
-
-  //this function will take the input value and will return the filtered and trimmed value array
-  controlData = (data) => {
-    let reg = /\s*(?:;|,|\n|$)\s*/;
-    let filteredTags = data.split(reg).filter(value => this.filterValue(value)).map(v => Number(v.trim()));
-    return filteredTags;
-}
-
-//implement filtering to prevent the unexpected behaviour of the JS
-filterValue = (value) => {
-  return isNaN(value) === false && value !== "" && value !== "Infinity";
 }
 
 validateInput(value) {
@@ -91,7 +79,7 @@ errorClass(error) {
             <div className="form-group"> 
               <Label for="adc-tags"> Tags </Label>
               {this.state.formErrors && <FormErrors formErrors={this.state.formErrors} /> }
-              <Input id="adc-tags" type="textarea" name="adc-tags" value={this.state.inputValue} onChange={this.handleChange} className={`form-control ${this.errorClass(this.state.formErrors.tag)}`} placeholder="Add the tags" onKeyPress={this.updateTags}   />
+              <Input id="adc-tags" type="textarea" name="adc-tags" value={this.state.inputValue} onChange={this.handleChange} className={`form-control ${errorClass(this.state.formErrors.tag)}`} placeholder="Add the tags" onKeyPress={this.updateTags}   />
             </div>
           </Form>
         </ModalBody>
