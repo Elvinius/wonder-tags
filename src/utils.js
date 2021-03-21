@@ -1,3 +1,9 @@
+//this function checks if the input field has only allowed characters
+export function validateAllowedCharacters(value) {
+    let allowedCharacters = /;|,|\n|[A-Za-z]|\d|\s|-/; //regex for allowed characters in the input field
+    return value.split("").every(v => allowedCharacters.test(v));
+};
+
 //implement filtering to prevent the unexpected behaviour of the JS
 function filterValue (value) {
     return isNaN(value) === false && value !== "" && value !== "Infinity";

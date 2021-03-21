@@ -14,7 +14,7 @@ import HeadingJumbotron from './HeadingJumbotron';
 import {
     FadeTransform
 } from 'react-animation-components';
-import {controlData, errorClass} from '../utils.js';
+import { controlData, errorClass, validateAllowedCharacters } from '../utils.js';
 
 class Tag extends Component {
     constructor(props) {
@@ -28,7 +28,6 @@ class Tag extends Component {
                 tag: ''
             },
             tagValid: false,
-            formValid: false,
             popoverOpen: false
         }
         //bind the functions to be able to refer to this
@@ -64,31 +63,24 @@ class Tag extends Component {
         let fieldValidationErrors = this.state.formErrors;
         fieldValidationErrors.tag = '';
         let tagValid = true;
-        let allowedCharacters = /;|,|\n|[A-Za-z]|\d|\s|-/; //regex for allowed characters in the input field
         if (value.length === 0) {
             fieldValidationErrors.tag = 'The form can not be blank!';
             tagValid = false;
         }
         //array method every checks if for every input value matches allowed characters and tag validity is also dependent on the non-empty field.
-        else if (value.length > 0 && !value.split("").every(v => allowedCharacters.test(v))) {
+        else if (value.length > 0 && !validateAllowedCharacters(value)) {
             fieldValidationErrors.tag = 'Tag is invalid';
             tagValid = false;
         }
         this.setState({
             formErrors: fieldValidationErrors,
             tagValid: tagValid,
-        }, this.validateForm);
-    }
-    //Decide the form validity according to the validity of the tags
-    validateForm() {
-        this.setState({
-            formValid: this.state.tagValid
         });
     }
 
     //Add the tags after adding tags and clicking or pressing the Enter key
     addTags = (e) => {
-        if (e.type === "submit" || (e.which === 13 && !e.shiftKey)) {
+        if (e.type === "click" || (e.which === 13 && !e.shiftKey)) {
             let {
                 tags
             } = this.state;
@@ -96,14 +88,12 @@ class Tag extends Component {
                 let newTags = controlData(this.state.inputValue);
                 newTags.forEach(tag => tags.push(tag));
                 let uniqueTags = [...new Set(tags)]; //Use the spread operator and Set to create a unique array
+                localStorage.setItem('myTags', JSON.stringify(uniqueTags));
                 this.setState({
                     tags: uniqueTags,
-                    inputValue: "",
-                    editTagsModal: false
-                    
-                }, 
-                //Set the local storage before submitting the button
-                localStorage.setItem('myTags', JSON.stringify(uniqueTags)));
+                    inputValue: ""
+                }
+                );
             }
         }
     }
@@ -127,7 +117,8 @@ class Tag extends Component {
             inputValue: ""
         });
     }
-
+    
+    //Close the edit modal after clicking the cancel button
     onEditCancel = () => {
         this.setState({
             editTagsModal: false
@@ -155,17 +146,19 @@ class Tag extends Component {
             <React.Fragment>
                 <HeadingJumbotron togglePopover={this.togglePopover} popoverOpen={this.state.popoverOpen} />
                 <div className="container tags-container">
-                    <Form onSubmit={this.addTags}>
+                    <Form>
                         <div className="form-group">
                             <Label for="adc-tags"> Tags </Label>
                             {this.state.formErrors && <FormErrors formErrors={this.state.formErrors} />}
-                            <Input type="submit" id="adc-tags" type="textarea" className={`form-control ${errorClass(this.state.formErrors.tag)}`} name="adc-tags" value={this.state.inputValue} onChange={this.handleChange} onKeyPress = {this.addTags} placeholder="Add the tags"/>
+                            <Input id="adc-tags" type="textarea" className={`form-control ${errorClass(this.state.formErrors.tag)}`} name="adc-tags" value={this.state.inputValue} onChange={this.handleChange} onKeyPress = {this.addTags} placeholder="Add the tags"/>
                         </div>
                         <Button className="main-buttons" color="secondary" type="button" onClick={this.toggleEditTagsModal}>Edit</Button>
-                        <Button className="main-buttons add-button" color="primary" type="submit" disabled={!this.state.formValid}>Add</Button>
+                        <Button className="main-buttons add-button" color="primary" type="button" onClick={this.addTags} disabled={!this.state.tagValid}>Add</Button>
                     </Form>
                     <hr className="break" />
-                    <EditModal onSave={this.refreshTags} onCancel={this.onEditCancel} isOpen={this.state.editTagsModal} toggle={this.toggleEditTagsModal} />
+                    {this.state.editTagsModal && (
+                        <EditModal onSave={this.refreshTags} onCancel={this.onEditCancel} isOpen={this.state.editTagsModal} toggle={this.toggleEditTagsModal} />
+                    )}
                     <div className="tags-box">
                         <ul>
                             {this.state.tags.map(number => {

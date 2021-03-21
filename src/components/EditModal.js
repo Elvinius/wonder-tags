@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { Button, Form, Input, Modal, ModalBody, ModalHeader, ModalFooter, Label } from 'reactstrap';
 import FormErrors from './FormErrors';
-import {controlData, errorClass} from '../utils.js';
+import {controlData, errorClass, validateAllowedCharacters} from '../utils.js';
 
 class EditModal extends Component {
   constructor(props) {
@@ -11,21 +11,27 @@ class EditModal extends Component {
       formErrors: {
         tag: ''
       },
-      formValid: false,
       tagValid: false
 
     }
     this.handleChange = this.handleChange.bind(this);
   }
 
-  componentDidMount() {
-    let tags = JSON.parse(localStorage.getItem('myTags')) !== null ? JSON.parse(localStorage.getItem('myTags')) : [];
-        this.setState({
-          inputValue: tags.join()
-            })
+//refresh the storage after mounting the component
+componentDidMount() {
+    this.refreshInput();
  }
 
-  handleChange = (e) => {
+ //assign the value of the updated tags to the edit input value
+ refreshInput = () => {
+  let tags = JSON.parse(localStorage.getItem('myTags')) !== null ? JSON.parse(localStorage.getItem('myTags')) : [];
+  this.setState({
+    inputValue: tags.join()
+      });
+ }
+
+//change the input value according to the target value
+ handleChange = (e) => {
     this.setState({
         inputValue: e.target.value
     },
@@ -34,8 +40,9 @@ class EditModal extends Component {
         })
 }
 
+//this function updates the tags either after clicking or pressing enter
 updateTags = (e) => {
-  if (e.type === "click" || e.key === "Enter") { 
+  if (e.type === "click" || (e.which === 13 && !e.shiftKey)) { 
       let { inputValue } = this.state;
       let changedTags = controlData(inputValue);
       let uniqueTags = [...new Set(changedTags)]; //Use the spread operator and Set to create a unique array
@@ -44,28 +51,22 @@ updateTags = (e) => {
   }
 }
 
+//validate the input value
 validateInput(value) {
   let fieldValidationErrors = this.state.formErrors;
   fieldValidationErrors.tag = '';
   let tagValid = true;
-  let allowedCharacters = /;|,|\n|[A-Za-z]|\d|\s|-/; //regex for allowed characters in the input field
-
   //array method every checks if for every input value matches allowed characters and tag validity is also dependent on the non-empty field.
-  if (value.length > 0 && !value.split("").every(v => allowedCharacters.test(v))) {
+  if (value.length > 0 && !validateAllowedCharacters(value)) {
       fieldValidationErrors.tag = 'Tag is invalid';
       tagValid = false;
   }
   this.setState({
       formErrors: fieldValidationErrors,
       tagValid: tagValid,
-  }, this.validateForm);
-}
-//Decide the form validity according to the validity of the tags
-validateForm() {
-  this.setState({
-      formValid: this.state.tagValid
   });
 }
+
 //Apply bootstrap classes depending on the existence of the errors
 errorClass(error) {
   return (error.length === 0 ? 'is-valid' : 'is-invalid');
@@ -81,12 +82,10 @@ errorClass(error) {
               {this.state.formErrors && <FormErrors formErrors={this.state.formErrors} /> }
               <Input id="adc-tags" type="textarea" name="adc-tags" value={this.state.inputValue} onChange={this.handleChange} className={`form-control ${errorClass(this.state.formErrors.tag)}`} placeholder="Add the tags" onKeyPress={this.updateTags}   />
             </div>
+            <Button className="main-buttons" color="primary" onClick = {this.updateTags} disabled={!this.state.tagValid}>Save</Button>
+            <Button className="main-buttons" color="danger" onClick={this.props.onCancel}>Cancel</Button>
           </Form>
         </ModalBody>
-        <ModalFooter>
-          <Button className="main-buttons" color="primary" onClick={this.updateTags} disabled={!this.state.formValid}>Save</Button>
-          <Button className="main-buttons" color="danger" onClick={this.props.onCancel}>Cancel</Button>
-        </ModalFooter>
       </Modal>
     )
   }
