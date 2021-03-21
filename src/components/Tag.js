@@ -23,9 +23,6 @@ class Tag extends Component {
             inputValue: "",
             tags: [],
             editTagsModal: false,
-            editedTagsData: {
-                value: ''
-            },
             formErrors: {
                 tag: ''
             },
@@ -36,21 +33,18 @@ class Tag extends Component {
         //bind the functions to be able to refer to this
         this.handleChange = this.handleChange.bind(this);
         this.addTags = this.addTags.bind(this);
+        this.editTagsToInput = this.editTagsToInput.bind(this);
         this.deleteTag = this.deleteTag.bind(this);
         this.toggleEditTagsModal = this.toggleEditTagsModal.bind(this);
         this.handleEditedValue = this.handleEditedValue.bind(this);
-        this.updateTags = this.updateTags.bind(this);
-        this.handleSubmit = this.handleSubmit.bind(this);
+        this.refreshTags = this.refreshTags.bind(this);
         this.controlData = this.controlData.bind(this);
         this.togglePopover = this.togglePopover.bind(this);
     }
 
     // Make sure that to set the state for the persistent tag buttons retrieved from localStorage API
     componentDidMount() {
-        const myTags = JSON.parse(localStorage.getItem('myTags')) !== null ? JSON.parse(localStorage.getItem('myTags')) : [];
-        this.setState({
-            tags: myTags
-        })
+       this.refreshTags();
     }
 
     //Function to handle the input value changes
@@ -63,14 +57,8 @@ class Tag extends Component {
     }
 
     //The following function will show the current tags when you open the edit modal after clicking the edit button
-    editTags = (value) => {
-        value = value.join();
-        this.setState({
-            editedTagsData: {
-                value
-            },
-            editTagsModal: !this.state.editTagsModal
-        })
+    editTagsToInput = (tags) => {
+        return tags.join();
     }
     //Similar to the handleChange and used for handling input value changes in the edit field
     handleEditedValue = (e) => {
@@ -88,17 +76,18 @@ class Tag extends Component {
     //Function to validate the input values, takes single event target value and checks if it fits the requirements
     validateField(value) {
         let fieldValidationErrors = this.state.formErrors;
-        let tagValid = this.state.tagValid;
+        fieldValidationErrors.tag = '';
+        let tagValid = true;
         let allowedCharacters = /;|,|\n|[A-Za-z]|\d|\s|-/; //regex for allowed characters in the input field
-        tagValid = value.split("").every(v => allowedCharacters.test(v)) && value.length !== 0; //array method every checks if for every input value matches allowed characters and tag validity is also dependent on the non-empty field.
-        if (tagValid) {
-            fieldValidationErrors.tag = '';
-        } else {
-            if (value.length === 0) {
-                fieldValidationErrors.tag = 'The form can not be blank!';
-            } else {
-                fieldValidationErrors.tag = 'Tag is invalid';
-            }
+
+        if (value.length === 0) {
+            fieldValidationErrors.tag = 'The form can not be blank!';
+            tagValid = false;
+        }
+        //array method every checks if for every input value matches allowed characters and tag validity is also dependent on the non-empty field.
+        else if (value.length > 0 && !value.split("").every(v => allowedCharacters.test(v))) {
+            fieldValidationErrors.tag = 'Tag is invalid';
+            tagValid = false;
         }
         this.setState({
             formErrors: fieldValidationErrors,
@@ -117,7 +106,7 @@ class Tag extends Component {
     }
     //Add the tags after adding tags and clicking or pressing the Enter key
     addTags = (e) => {
-        if (e.type === "click" || e.key === "Enter") {
+        if (e.type === "submit" || (e.which === 13 && !e.shiftKey)) {
             let {
                 tags
             } = this.state;
@@ -129,23 +118,15 @@ class Tag extends Component {
                     tags: uniqueTags,
                     inputValue: "",
                     editTagsModal: false
-                })
+                    //Set the local storage before submitting the button
+                }, localStorage.setItem('myTags', JSON.stringify(uniqueTags)));
             }
         }
-
+        //e.preventDefault();
     }
     //implement filtering to prevent the unexpected behaviour of the JS
     filterValue = (value) => {
         return isNaN(value) === false && value !== "" && value !== "Infinity";
-    }
-
-    //Set the local storage before submitting the button 
-    handleSubmit = (e) => {
-        let {
-            tags
-        } = this.state;
-        localStorage.setItem('myTags', JSON.stringify(tags));
-        e.preventDefault();
     }
 
     //Delete tags according to their key values. As the added numbers should all be unique keys are composed of those number values
@@ -162,29 +143,26 @@ class Tag extends Component {
     //Toggle edit modal with the help of the below function
     toggleEditTagsModal = () => {
         this.setState({
-            editTagsModal: !this.state.editTagsModal
+            editTagsModal: !this.state.editTagsModal,
+            inputValue: ""
+        });
+    }
+
+    onEditCancel = () => {
+        this.setState({
+            editTagsModal: false
         });
     }
 
     //After adding the save button or pressing the Enter key save the changed button values and change the local storage accordingly 
-    updateTags = (e) => {
-        if (e.type === "click" || e.key === "Enter") {
-            let {
-                editedTagsData
-            } = this.state;
-            if (editedTagsData.value.length !== 0) {
-                let uniqueTags = [...new Set(this.controlData(editedTagsData.value))];
-                this.setState({
-                    tags: uniqueTags,
-                    editedTagsData: {
-                        value: ''
-                    },
-                    editTagsModal: false
-                })
-                localStorage.setItem('myTags', JSON.stringify(uniqueTags));
-            }
-        }
+    refreshTags = (e) => {
+        let updatedTags = JSON.parse(localStorage.getItem('myTags')) !== null ? JSON.parse(localStorage.getItem('myTags')) : [];
+        this.setState({
+            tags: updatedTags,
+            editTagsModal: false
+            })
     }
+
     //this function will take the input value and will return the filtered and trimmed value array
     controlData = (data) => {
         let reg = /\s*(?:;|,|\n|$)\s*/;
@@ -204,17 +182,17 @@ class Tag extends Component {
             <React.Fragment>
                 <HeadingJumbotron togglePopover={this.togglePopover} popoverOpen={this.state.popoverOpen} />
                 <div className="container tags-container">
-                    <Form onSubmit={this.handleSubmit}>
+                    <Form onSubmit={this.addTags}>
                         <div className="form-group">
                             <Label for="adc-tags"> Tags </Label>
                             {this.state.formErrors && <FormErrors formErrors={this.state.formErrors} />}
-                            <Input id="adc-tags" type="textarea" className={`form-control ${this.errorClass(this.state.formErrors.tag)}`} name="adc-tags" value={this.state.inputValue} onChange={this.handleChange} placeholder="Add the tags" onKeyPress={this.addTags} />
+                            <Input type="submit" id="adc-tags" type="textarea" className={`form-control ${this.errorClass(this.state.formErrors.tag)}`} name="adc-tags" value={this.state.inputValue} onChange={this.handleChange} onKeyPress = {this.addTags} placeholder="Add the tags"/>
                         </div>
-                        <Button className="main-buttons" color="secondary" onClick={this.editTags.bind(this, [...this.state.tags])} type="submit">Edit</Button>
-                        <Button className="main-buttons add-button" color="primary" onClick={this.addTags} type="submit" disabled={!this.state.formValid}>Add</Button>
+                        <Button className="main-buttons" color="secondary" type="button" onClick={this.toggleEditTagsModal}>Edit</Button>
+                        <Button className="main-buttons add-button" color="primary" type="submit" disabled={!this.state.formValid}>Add</Button>
                     </Form>
                     <hr className="break" />
-                    <EditModal editTagsModal={this.state.editTagsModal} toggleEditTagsModal={this.toggleEditTagsModal} handleEditedValue={this.handleEditedValue} editedTagsData={this.state.editedTagsData} updateTags={this.updateTags} formValid={this.state.formValid} formErrors={this.state.formErrors} errorClass={this.errorClass} />
+                    <EditModal onSave={this.refreshTags} onCancel={this.onEditCancel} isOpen={this.state.editTagsModal} toggle={this.toggleEditTagsModal} />
                     <div className="tags-box">
                         <ul>
                             {this.state.tags.map(number => {
