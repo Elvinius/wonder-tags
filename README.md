@@ -8,13 +8,23 @@ The project was bootstrapped with [Create React App](https://github.com/facebook
 
 * Bootstrap
 * Reactstrap
-* react-animation-components
-* Font-awesome
+* React-Animation-Components
+* Font-Awesome
+
+The components, places under the folder with the same name are as follows:
+
+* EditModal
+* FormError
+* HeadingJumbotron
+* Tag
+* TagButton
+
+The state information has been defined inside the Tag class component. The rest of the components are functional ones. Please note that the legacy React has been used for the project rather than React Hooks.
 
 ## Final design
 
 ![Wonder-tags final design]
-(./wonder-tags.png)
+(https://github.com/Elvinius/wonder-tags/blob/main/wonder-tags.png)
 
 
 ## Available Scripts
