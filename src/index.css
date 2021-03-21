@@ -18,8 +18,7 @@ ul {
 	/* use flex properties to align tag button list */
 	display: flex; 
 	flex-wrap: wrap;
-	justify-content: space-between;
-	align-content: space-between;
+	justify-content: start;
 	width: 100%;
 	max-width: 700px;
 }
@@ -59,7 +58,7 @@ div.wonder-heading {
 	padding-top: 1em;
 	border-radius: 1%;
 	box-shadow: 0 0 5px 5px rgba(255, 255, 255, 0.5);
-	height: 500px;
+	height: 100%;
 	width: 50%;
 	max-width: 700px;
 	background: #E0EAFC;  /* fallback for old browsers */
@@ -83,6 +82,12 @@ div.wonder-heading {
 
  label {
 	font-size: 1.25em;
+}
+/* style for tag box */
+
+div.tags-box {
+	display: flex;
+	flex-wrap: wrap;
 }
 
 /* Add background color for the modal content */
@@ -124,13 +129,6 @@ button.tag-button {
   border: none;
 }
 
-div.tags-box {
-	width: 50%;
-	max-width: 700px;
-	display: flex;
-	flex-wrap: wrap;
-}
-
 button#Popover1:hover {
 	background-color: white;
   	color: black;
@@ -141,4 +139,22 @@ button#Popover1:hover {
 
 hr.break {
 	border-top: 1px dashed black;
+}
+
+/* small-screen resolution styles */
+@media only screen and (max-width: 768px) { 
+	.container.tags-container {
+		width: 80%;
+	}
+	h1.display-4 {
+		font-size: 2em;
+	}
+	div.wonder-heading {
+		padding-top: 1em;
+		padding-bottom: 1em;
+	}
+	div.wonder-heading p {
+		font-size: 1em; 
+	}
+
 }
