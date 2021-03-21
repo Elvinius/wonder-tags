@@ -2,7 +2,7 @@ import Tag from './components/Tag.js';
 
 function App() {
   return (
-    <div className="App">
+    <div>
       <Tag />
     </div>
   );
