@@ -118,3 +118,14 @@ hr.break {
 label {
 	font-size: 1.25em;
 }
+
+button#Popover1:hover {
+	background-color: white;
+  	color: black;
+  	box-shadow: 0 10px 14px 0 rgba(0,0,0,0.24), 0 14px 45px 0 rgba(0,0,0,0.19);
+}
+
+div.wonder-heading {
+	background: #ffb32c;
+	color: white;
+}

@@ -1,9 +1,19 @@
-import React, { Component } from 'react';
+import React, {
+    Component
+} from 'react';
 import TagButton from './TagButton';
 import EditModal from './EditModal';
-import { Button, Label, Form, Input } from 'reactstrap';
+import {
+    Button,
+    Label,
+    Form,
+    Input
+} from 'reactstrap';
 import FormErrors from './FormErrors';
-import { FadeTransform } from 'react-animation-components';
+import HeadingJumbotron from './HeadingJumbotron';
+import {
+    FadeTransform
+} from 'react-animation-components';
 
 class Tag extends Component {
     constructor(props) {
@@ -15,9 +25,12 @@ class Tag extends Component {
             editedTagsData: {
                 value: ''
             },
-            formErrors: { tag: '' },
+            formErrors: {
+                tag: ''
+            },
             tagValid: false,
-            formValid: false
+            formValid: false,
+            popoverOpen: false
         }
         this.handleChange = this.handleChange.bind(this);
         this.addTags = this.addTags.bind(this);
@@ -27,6 +40,7 @@ class Tag extends Component {
         this.updateTags = this.updateTags.bind(this);
         this.handleSubmit = this.handleSubmit.bind(this);
         this.controlData = this.controlData.bind(this);
+        this.togglePopover = this.togglePopover.bind(this);
     }
 
     componentDidMount() {
@@ -39,25 +53,34 @@ class Tag extends Component {
     handleChange = (e) => {
         this.setState({
             inputValue: e.target.value
-        }, () => { this.validateField(e.target.value) })
+        }, () => {
+            this.validateField(e.target.value)
+        })
     }
 
     editTags = (value) => {
         value = value.join();
-        this.setState(
-            {
-                editedTagsData: {value},
-                editTagsModal: !this.state.editTagsModal
+        this.setState({
+            editedTagsData: {
+                value
+            },
+            editTagsModal: !this.state.editTagsModal
         })
     }
 
     handleEditedValue = (e) => {
-        let {editedTagsData} = this.state;
+        let {
+            editedTagsData
+        } = this.state;
         editedTagsData.value = e.target.value;
         console.log(editedTagsData.value);
-        this.setState({ editedTagsData: editedTagsData  },
-            () => { this.validateField(e.target.value) })
-      }
+        this.setState({
+            editedTagsData: editedTagsData
+        },
+            () => {
+                this.validateField(e.target.value)
+            })
+    }
 
     validateField(value) {
         let fieldValidationErrors = this.state.formErrors;
@@ -80,7 +103,9 @@ class Tag extends Component {
     }
 
     validateForm() {
-        this.setState({ formValid: this.state.tagValid });
+        this.setState({
+            formValid: this.state.tagValid
+        });
     }
 
     errorClass(error) {
@@ -89,7 +114,9 @@ class Tag extends Component {
 
     addTags = (e) => {
         if (e.type === "click" || e.key === "Enter") {
-            let { tags } = this.state;
+            let {
+                tags
+            } = this.state;
             if (this.state.inputValue.length !== 0) {
                 let newTags = this.controlData(this.state.inputValue);
                 newTags.forEach(tag => tags.push(tag));
@@ -108,10 +135,12 @@ class Tag extends Component {
     }
 
     handleSubmit = (e) => {
-        let { tags } = this.state;
+        let {
+            tags
+        } = this.state;
         localStorage.setItem('myTags', JSON.stringify(tags));
         e.preventDefault();
-    }  
+    }
 
     deleteTag = (key) => (e) => {
         console.log(e);
@@ -133,12 +162,16 @@ class Tag extends Component {
 
     updateTags = (e) => {
         if (e.type === "click" || e.key === "Enter") {
-            let { editedTagsData } = this.state;
+            let {
+                editedTagsData
+            } = this.state;
             if (editedTagsData.value.length !== 0) {
                 let uniqueTags = [...new Set(this.controlData(editedTagsData.value))];
                 this.setState({
                     tags: uniqueTags,
-                    editedTagsData: {value: ''},
+                    editedTagsData: {
+                        value: ''
+                    },
                     editTagsModal: false
                 })
                 localStorage.setItem('myTags', JSON.stringify(uniqueTags));
@@ -152,34 +185,43 @@ class Tag extends Component {
         return filteredTags;
     }
 
+    togglePopover = () => {
+        this.setState({
+            popoverOpen: !this.state.popoverOpen
+        })
+    }
+
     render() {
         return (
-            <div className="container tags-container">
-                <Form onSubmit={this.handleSubmit}>
-                    <div className="form-group">
-                        <Label for="adc-tags"> Tags </Label>
-                        {this.state.formErrors && <FormErrors formErrors={this.state.formErrors} /> }
-                        <Input id="adc-tags" type="textarea" className={`form-control ${this.errorClass(this.state.formErrors.tag)}`} name="adc-tags" value={this.state.inputValue} onChange={this.handleChange} placeholder="Add the tags" onKeyPress={this.addTags} />
+            <React.Fragment>
+                <HeadingJumbotron togglePopover={this.togglePopover} popoverOpen={this.state.popoverOpen} />
+                <div className="container tags-container">
+                    <Form onSubmit={this.handleSubmit}>
+                        <div className="form-group">
+                            <Label for="adc-tags"> Tags </Label>
+                            {this.state.formErrors && <FormErrors formErrors={this.state.formErrors} />}
+                            <Input id="adc-tags" type="textarea" className={`form-control ${this.errorClass(this.state.formErrors.tag)}`} name="adc-tags" value={this.state.inputValue} onChange={this.handleChange} placeholder="Add the tags" onKeyPress={this.addTags} />
+                        </div>
+                        <Button className="main-buttons" color="secondary" onClick={this.editTags.bind(this, [...this.state.tags])} type="submit">Edit</Button>
+                        <Button className="main-buttons add-button" color="primary" onClick={this.addTags} type="submit" disabled={!this.state.formValid}>Add</Button>
+                    </Form>
+                    <hr className="break" />
+                    <EditModal editTagsModal={this.state.editTagsModal} toggleEditTagsModal={this.toggleEditTagsModal} handleEditedValue={this.handleEditedValue} editedTagsData={this.state.editedTagsData} updateTags={this.updateTags} formValid={this.state.formValid} formErrors={this.state.formErrors} errorClass={this.errorClass} />
+                    <div className="tags-box">
+                        <ul>
+                            {this.state.tags.map(number => {
+                                return (<li key={number} >
+                                    <FadeTransform in transformProps={{
+                                        exitTransform: 'scale(0.5) translateY(-50%)'
+                                    }}>
+                                        <TagButton number={number} onRemove={this.deleteTag} />
+                                    </FadeTransform>
+                                </li>);
+                            })}
+                        </ul>
                     </div>
-                    <Button className="main-buttons" color="secondary" onClick={this.editTags.bind(this, [...this.state.tags])} type="submit">Edit</Button>
-                    <Button className="main-buttons add-button" color="primary" onClick={this.addTags} type="submit" disabled={!this.state.formValid}>Add</Button>
-                </Form>
-                <hr className="break" />
-                <EditModal editTagsModal={this.state.editTagsModal} toggleEditTagsModal={this.toggleEditTagsModal} handleEditedValue={this.handleEditedValue} editedTagsData={this.state.editedTagsData} updateTags={this.updateTags} formValid={this.state.formValid} formErrors={this.state.formErrors} errorClass={this.errorClass} />
-                <div className="tags-box">
-                    <ul>
-                        {this.state.tags.map(number => {
-                            return (<li key={number} >
-                                <FadeTransform in transformProps={{
-                                    exitTransform: 'scale(0.5) translateY(-50%)'
-                                }}>
-                                    <TagButton number={number} onRemove={this.deleteTag} />
-                                </FadeTransform>
-                            </li>);
-                        })}
-                    </ul>
                 </div>
-            </div>
+            </React.Fragment>
         )
     }
 
