@@ -19,11 +19,6 @@ class EditModal extends Component {
 
 //refresh the storage after mounting the component
 componentDidMount() {
-    this.refreshInput();
- }
-
- //assign the value of the updated tags to the edit input value
- refreshInput = () => {
   let tags = JSON.parse(localStorage.getItem('myTags')) !== null ? JSON.parse(localStorage.getItem('myTags')) : [];
   this.setState({
     inputValue: tags.join()
@@ -31,13 +26,13 @@ componentDidMount() {
  }
 
 //change the input value according to the target value
- handleChange = (e) => {
-    this.setState({
-        inputValue: e.target.value
-    },
-        () => {
-            this.validateInput(e.target.value)
-        })
+handleChange = (e) => {
+  this.setState({
+      inputValue: e.target.value
+  },
+      () => {
+          this.validateInput(e.target.value)
+      })
 }
 
 //this function updates the tags either after clicking or pressing enter
@@ -67,14 +62,10 @@ validateInput(value) {
   });
 }
 
-//Apply bootstrap classes depending on the existence of the errors
-errorClass(error) {
-  return (error.length === 0 ? 'is-valid' : 'is-invalid');
-}
   render () {
     return (
       <Modal isOpen={this.props.isOpen} toggle={this.props.toggle}>
-        <ModalHeader toggle={this.props.toggle}>Edit tags</ModalHeader>
+        <ModalHeader>Edit tags</ModalHeader>
         <ModalBody>
           <Form>
             <div className="form-group"> 

@@ -87,17 +87,16 @@ class Tag extends Component {
             if (this.state.inputValue.length !== 0) {
                 let newTags = controlData(this.state.inputValue);
                 newTags.forEach(tag => tags.push(tag));
-                let uniqueTags = [...new Set(tags)]; //Use the spread operator and Set to create a unique array
+                //Use the spread operator and Set to create a unique array
+                let uniqueTags = [...new Set(tags)];
                 localStorage.setItem('myTags', JSON.stringify(uniqueTags));
                 this.setState({
                     tags: uniqueTags,
                     inputValue: ""
-                }
-                );
+                });
             }
         }
     }
- 
 
     //Delete tags according to their key values. As the added numbers should all be unique keys are composed of those number values
     deleteTag = (key) => (e) => {
@@ -131,7 +130,7 @@ class Tag extends Component {
         this.setState({
             tags: updatedTags,
             editTagsModal: false
-            })
+        })
     }
 
     // to toggle popover button
